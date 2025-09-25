@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jharkhand Tourism - Discover the Heart of India</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        .hero-video {
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5));
+            z-index: 1;
+        }
+        
+        .nav-active {
+            background-color: #3b82f6 !important;
+            color: white !important;
+        }
+        
+        .gallery-scroll {
+            animation: scroll 20s linear infinite;
+        }
+        
+        @keyframes scroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100%); }
+        }
+        
+        .weather-widget {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .weather-details {
+            position: fixed;
+            top: 70px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        .destination-card:hover .explore-btn {
+            opacity: 1;
+        }
+        
+        .explore-btn {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+        }
+        
+        .booking-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <!-- Weather Widget -->
+    <div class="weather-widget" onclick="toggleWeather()">
+        <span class="text-2xl">🌤️</span>
+    </div>
+    
+    <div class="weather-details" id="weatherDetails">
+        <h3 class="font-bold text-lg mb-2">Ranchi Weather</h3>
+        <p class="text-gray-600">Temperature: 24°C</p>
+        <p class="text-gray-600">Humidity: 65%</p>
+        <p class="text-gray-600">Wind: 12 km/h</p>
+        <p class="text-gray-600">Condition: Partly Cloudy</p>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <div id="chatbotWidget" class="bg-green-600 text-white p-4 rounded-full cursor-pointer shadow-lg hover:bg-green-700 transition transform hover:scale-110" onclick="toggleChatbot()">
+            <span class="text-2xl">🤖</span>
+        </div>
+        
+        <div id="chatbotWindow" class="hidden absolute bottom-16 right-0 w-80 h-96 bg-white rounded-lg shadow-2xl border">
+            <div class="bg-green-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+                <h3 class="font-bold">JharBot - Tourism Assistant</h3>
+                <button onclick="toggleChatbot()" class="text-white hover:text-gray-200">✕</button>
+            </div>
+            <div id="chatMessages" class="h-64 overflow-y-auto p-4 space-y-2">
+                <div class="bg-gray-100 p-2 rounded-lg">
+                    <p class="text-sm">Hi! I'm JharBot, your Jharkhand tourism assistant. How can I help you today?</p>
+                </div>
+            </div>
+            <div class="p-4 border-t">
+                <div class="flex space-x-2">
+                    <input type="text" id="chatInput" placeholder="Ask about destinations, hotels..." class="flex-1 p-2 border rounded-lg text-sm" onkeypress="handleChatKeyPress(event)">
+                    <button onclick="sendChatMessage()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Page -->
+    <div id="mainPage" class="page active">
+        <!-- Navigation -->
+        <nav class="fixed top-0 w-full bg-white/70 backdrop-blur-lg z-50 shadow-lg border-b border-white/20">
+            <div class="container mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold text-green-700">Jharkhand Tourism</h1>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="#" onclick="showPage('mainPage')" class="nav-link nav-active px-3 py-2 rounded-lg">Home</a>
+                        <a href="#" onclick="showPage('destinationsPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Destinations</a>
+                        <a href="#" onclick="showPage('tripPlannerPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Trip Planner</a>
+                        <a href="#" onclick="showPage('bookTicketsPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Book Tickets</a>
+                        <a href="#" onclick="showPage('localMarketPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Local Market</a>
+                        <a href="#" onclick="showPage('foodDiningPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Food & Dining</a>
+                        <a href="#" onclick="showPage('galleryPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Gallery</a>
+                        <a href="#contact" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Contact</a>
+                        <button onclick="showLogin()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition" id="loginBtn">Login</button>
+                        <button onclick="showSOS()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition">SOS</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Video Section -->
+        <section class="hero-video">
+            <div class="video-overlay"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/50"></div>
+            
+            <!-- Simulated Video Background -->
+            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 800%22><defs><linearGradient id=%22bg%22 x1=%220%22 y1=%220%22 x2=%22100%25%22 y2=%22100%25%22><stop offset=%220%22 stop-color=%22%234ade80%22/><stop offset=%22100%25%22 stop-color=%22%2322c55e%22/></linearGradient></defs><rect width=%221200%22 height=%22800%22 fill=%22url(%23bg)%22/><path d=%22M0,400 Q300,200 600,400 T1200,400 L1200,800 L0,800 Z%22 fill=%22%23166534%22 opacity=%220.7%22/><circle cx=%22200%22 cy=%22150%22 r=%2250%22 fill=%22%23fbbf24%22 opacity=%220.8%22/><path d=%22M800,300 L900,200 L1000,300 L950,400 L850,400 Z%22 fill=%22%23374151%22/><path d=%22M100,500 Q200,450 300,500 Q400,550 500,500%22 stroke=%22%2306b6d4%22 stroke-width=%2210%22 fill=%22none%22/></svg>')"></div>
+            
+            <div class="relative z-10 flex flex-col items-center justify-end h-full pb-32 text-white text-center">
+                <h2 class="text-5xl font-bold mb-8 animate-pulse">Discover Jharkhand</h2>
+                <div class="bg-white/20 backdrop-blur-md rounded-full p-4 w-full max-w-md">
+                    <input type="text" placeholder="Search destinations, activities..." class="w-full bg-transparent text-white placeholder-white/80 outline-none px-4 py-2">
+                    <button class="absolute right-6 top-1/2 transform -translate-y-1/2 text-white">🔍</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Plan Your Journey -->
+        <section class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl font-bold text-center mb-16 text-gray-800">Plan Your Journey</h2>
+                <div class="grid md:grid-cols-4 gap-8">
+                    <div class="text-center p-6 rounded-xl hover:shadow-lg transition">
+                        <div class="text-6xl mb-4">🏔️</div>
+                        <h3 class="text-xl font-semibold mb-2">Destinations</h3>
+                        <p class="text-gray-600">Explore breathtaking locations</p>
+                    </div>
+                    <div class="text-center p-6 rounded-xl hover:shadow-lg transition">
+                        <div class="text-6xl mb-4">🗺️</div>
+                        <h3 class="text-xl font-semibold mb-2">Plan Your Trip</h3>
+                        <p class="text-gray-600">AI-powered trip planning</p>
+                    </div>
+                    <div class="text-center p-6 rounded-xl hover:shadow-lg transition">
+                        <div class="text-6xl mb-4">🏨</div>
+                        <h3 class="text-xl font-semibold mb-2">Stay</h3>
+                        <p class="text-gray-600">Comfortable accommodations</p>
+                    </div>
+                    <div class="text-center p-6 rounded-xl hover:shadow-lg transition">
+                        <div class="text-6xl mb-4">🛍️</div>
+                        <h3 class="text-xl font-semibold mb-2">Shop</h3>
+                        <p class="text-gray-600">Local crafts and souvenirs</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Top Destinations -->
+        <section class="py-20 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl font-bold text-center mb-16 text-gray-800">Top Destinations</h2>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="destination-card relative group cursor-pointer rounded-xl overflow-hidden shadow-lg">
+                        <div class="h-[75vh] bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                            <span class="text-white text-8xl">🏔️</span>
+                        </div>
+                        <div class="absolute inset-0 bg-black/40 flex items-end">
+                            <div class="p-6 text-white w-full">
+                                <h3 class="text-xl font-bold">Netarhat</h3>
+                                <button class="explore-btn absolute top-4 right-4 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm">Explore</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="destination-card relative group cursor-pointer rounded-xl overflow-hidden shadow-lg">
+                        <div class="h-[75vh] bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                            <span class="text-white text-8xl">💧</span>
+                        </div>
+                        <div class="absolute inset-0 bg-black/40 flex items-end">
+                            <div class="p-6 text-white w-full">
+                                <h3 class="text-xl font-bold">Hundru Falls</h3>
+                                <button class="explore-btn absolute top-4 right-4 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm">Explore</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="destination-card relative group cursor-pointer rounded-xl overflow-hidden shadow-lg">
+                        <div class="h-[75vh] bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                            <span class="text-white text-8xl">🏛️</span>
+                        </div>
+                        <div class="absolute inset-0 bg-black/40 flex items-end">
+                            <div class="p-6 text-white w-full">
+                                <h3 class="text-xl font-bold">Deoghar</h3>
+                                <button class="explore-btn absolute top-4 right-4 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm">Explore</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="destination-card relative group cursor-pointer rounded-xl overflow-hidden shadow-lg">
+                        <div class="h-[75vh] bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                            <span class="text-white text-8xl">🌲</span>
+                        </div>
+                        <div class="absolute inset-0 bg-black/40 flex items-end">
+                            <div class="p-6 text-white w-full">
+                                <h3 class="text-xl font-bold">Betla National Park</h3>
+                                <button class="explore-btn absolute top-4 right-4 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm">Explore</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="destination-card relative group cursor-pointer rounded-xl overflow-hidden shadow-lg">
+                        <div class="h-[75vh] bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center">
+                            <span class="text-white text-8xl">⛰️</span>
+                        </div>
+                        <div class="absolute inset-0 bg-black/40 flex items-end">
+                            <div class="p-6 text-white w-full">
+                                <h3 class="text-xl font-bold">Parasnath Hill</h3>
+                                <button class="explore-btn absolute top-4 right-4 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm">Explore</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="destination-card relative group cursor-pointer rounded-xl overflow-hidden shadow-lg">
+                        <div class="h-[75vh] bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
+                            <span class="text-white text-8xl">🏞️</span>
+                        </div>
+                        <div class="absolute inset-0 bg-black/40 flex items-end">
+                            <div class="p-6 text-white w-full">
+                                <h3 class="text-xl font-bold">Hazaribagh</h3>
+                                <button class="explore-btn absolute top-4 right-4 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm">Explore</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Beauty of Jharkhand -->
+        <section class="min-h-screen py-20 bg-cover bg-center relative flex items-center" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 600%22><defs><linearGradient id=%22waterfall%22 x1=%220%22 y1=%220%22 x2=%22100%25%22 y2=%22100%25%22><stop offset=%220%22 stop-color=%22%2306b6d4%22/><stop offset=%22100%25%22 stop-color=%22%230891b2%22/></linearGradient></defs><rect width=%221200%22 height=%22600%22 fill=%22url(%23waterfall)%22/><path d=%22M0,0 Q300,200 600,100 T1200,150 L1200,600 L0,600 Z%22 fill=%22%23065f46%22/><path d=%22M400,0 L420,600%22 stroke=%22white%22 stroke-width=%2210%22 opacity=%220.8%22/><path d=%22M500,50 L520,600%22 stroke=%22white%22 stroke-width=%228%22 opacity=%220.6%22/></svg>')">
+            <div class="container mx-auto px-6">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="text-white">
+                        <h2 class="text-6xl font-bold mb-8">Beauty of Jharkhand</h2>
+                        <p class="text-xl leading-relaxed mb-8">Experience the pristine beauty of Jharkhand's landscapes, from cascading waterfalls to dense forests. Discover a land where nature's grandeur meets cultural richness, creating unforgettable memories for every traveler.</p>
+                        <p class="text-lg leading-relaxed">From the misty hills of Netarhat to the sacred groves of tribal communities, Jharkhand offers an unparalleled journey through India's heartland. Every valley tells a story, every waterfall sings a song of ancient times.</p>
+                    </div>
+                    <div class="grid grid-cols-1 gap-8">
+                        <div class="bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl p-20 text-center text-white transform hover:scale-105 transition h-96 flex flex-col justify-center">
+                            <div class="text-9xl mb-8">👥</div>
+                            <h3 class="font-bold text-3xl">Tribal Life</h3>
+                            <p class="text-xl mt-6 opacity-90">Rich cultural heritage</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl p-20 text-center text-white transform hover:scale-105 transition h-96 flex flex-col justify-center">
+                            <div class="text-9xl mb-8">🎨</div>
+                            <h3 class="font-bold text-3xl">Handcraft</h3>
+                            <p class="text-xl mt-6 opacity-90">Artistic traditions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="relative h-[600px] overflow-hidden rounded-xl">
+                        <div class="gallery-scroll space-y-6">
+                            <div class="h-48 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center text-white text-4xl font-bold shadow-lg">🏔️ Netarhat Hills</div>
+                            <div class="h-48 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg flex items-center justify-center text-white text-4xl font-bold shadow-lg">💧 Hundru Falls</div>
+                            <div class="h-48 bg-gradient-to-r from-orange-400 to-red-500 rounded-lg flex items-center justify-center text-white text-4xl font-bold shadow-lg">🏛️ Deoghar Temple</div>
+                            <div class="h-48 bg-gradient-to-r from-purple-400 to-pink-500 rounded-lg flex items-center justify-center text-white text-4xl font-bold shadow-lg">🌲 Betla Forest</div>
+                            <div class="h-48 bg-gradient-to-r from-teal-400 to-green-500 rounded-lg flex items-center justify-center text-white text-4xl font-bold shadow-lg">🎨 Tribal Art</div>
+                            <div class="h-48 bg-gradient-to-r from-indigo-400 to-blue-500 rounded-lg flex items-center justify-center text-white text-4xl font-bold shadow-lg">⛰️ Parasnath Peak</div>
+                            <div class="h-48 bg-gradient-to-r from-rose-400 to-pink-500 rounded-lg flex items-center justify-center text-white text-4xl font-bold shadow-lg">🌅 Valley Views</div>
+                            <div class="h-48 bg-gradient-to-r from-amber-400 to-orange-500 rounded-lg flex items-center justify-center text-white text-4xl font-bold shadow-lg">🏞️ Hazaribagh</div>
+                            <div class="h-48 bg-gradient-to-r from-cyan-400 to-teal-500 rounded-lg flex items-center justify-center text-white text-4xl font-bold shadow-lg">💦 Dassam Falls</div>
+                            <div class="h-48 bg-gradient-to-r from-lime-400 to-green-500 rounded-lg flex items-center justify-center text-white text-4xl font-bold shadow-lg">🌺 Flora & Fauna</div>
+                            <div class="h-48 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center text-white text-4xl font-bold shadow-lg">🏔️ Netarhat Hills</div>
+                            <div class="h-48 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg flex items-center justify-center text-white text-4xl font-bold shadow-lg">💧 Hundru Falls</div>
+                        </div>
+                    </div>
+                    <div class="text-center bg-cover bg-center rounded-xl p-16 h-[600px] flex flex-col justify-center" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 300%22><rect width=%22400%22 height=%22300%22 fill=%22%2322c55e%22/><circle cx=%22100%22 cy=%2280%22 r=%2230%22 fill=%22%23fbbf24%22/><path d=%22M0,200 Q100,150 200,200 T400,200 L400,300 L0,300 Z%22 fill=%22%23166534%22/><path d=%22M50,250 Q100,230 150,250 Q200,270 250,250%22 stroke=%22%2306b6d4%22 stroke-width=%225%22 fill=%22none%22/></svg>')">
+                        <h3 class="text-5xl font-bold text-white mb-8">Discover More</h3>
+                        <p class="text-xl text-white mb-6 opacity-90">Explore our complete photo gallery showcasing the breathtaking beauty of Jharkhand</p>
+                        <p class="text-lg text-white mb-8 opacity-80 italic leading-relaxed">"Every picture tells a story, every frame captures a moment, and together they weave the soul of our journey. Welcome to our gallery — a place where memories live forever."</p>
+                        <button onclick="showPage('galleryPage')" class="bg-white text-green-600 px-12 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition transform hover:scale-105">Explore Full Gallery</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+        <!-- Footer -->
+        <footer id="contact" class="bg-gray-900 text-white py-16">
+            <div class="container mx-auto px-6">
+                <div class="grid md:grid-cols-4 gap-8">
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">Jharkhand Tourism</h3>
+                        <p class="text-gray-400">Discover the heart of India with us</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-4">Quick Links</h4>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><a href="#" class="hover:text-white transition">About Us</a></li>
+                            <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+                            <li><a href="#" class="hover:text-white transition">Terms of Service</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-4">Help & Support</h4>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><a href="#" class="hover:text-white transition">Contact Us</a></li>
+                            <li><a href="#" class="hover:text-white transition">FAQ</a></li>
+                            <li><a href="#" class="hover:text-white transition">Travel Guide</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-4">Contact Info</h4>
+                        <p class="text-gray-400">📧 info@jharkhnadtourism.gov.in</p>
+                        <p class="text-gray-400">📞 +91-651-2446441</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Destinations Page -->
+    <div id="destinationsPage" class="page">
+        <nav class="fixed top-0 w-full bg-white/70 backdrop-blur-lg z-50 shadow-lg border-b border-white/20">
+            <div class="container mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold text-green-700">Jharkhand Tourism</h1>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="#" onclick="showPage('mainPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Home</a>
+                        <a href="#" onclick="showPage('destinationsPage')" class="nav-link nav-active px-3 py-2 rounded-lg">Destinations</a>
+                        <a href="#" onclick="showPage('tripPlannerPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Trip Planner</a>
+                        <a href="#" onclick="showPage('bookTicketsPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Book Tickets</a>
+                        <a href="#" onclick="showPage('localMarketPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Local Market</a>
+                        <a href="#" onclick="showPage('foodDiningPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Food & Dining</a>
+                        <a href="#" onclick="showPage('galleryPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Gallery</a>
+                        <button onclick="showLogin()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition" id="loginBtn2">Login</button>
+                        <button onclick="showSOS()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition">SOS</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="pt-24 pb-16">
+            <div class="container mx-auto px-6">
+                <h1 class="text-4xl font-bold text-center mb-16 text-gray-800">Explore Destinations</h1>
+                
+                <div class="grid md:grid-cols-3 gap-8 mb-16" id="destinationGrid">
+                    <!-- First 9 destinations -->
+                </div>
+                
+                <div class="text-center" id="viewMoreSection">
+                    <button onclick="loadMoreDestinations()" id="viewMoreBtn" class="bg-green-600 text-white px-12 py-4 rounded-full font-semibold text-lg hover:bg-green-700 transition transform hover:scale-105">View More Destinations</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trip Planner Page -->
+    <div id="tripPlannerPage" class="page">
+        <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 shadow-lg">
+            <div class="container mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold text-green-700">Jharkhand Tourism</h1>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="#" onclick="showPage('mainPage')" class="nav-link nav-active px-3 py-2 rounded-lg">Home</a>
+                        <a href="#" onclick="showPage('destinationsPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Destinations</a>
+                        <a href="#" onclick="showPage('tripPlannerPage')" class="nav-link nav-active px-3 py-2 rounded-lg">Trip Planner</a>
+                        <a href="#" onclick="showPage('bookTicketsPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Book Tickets</a>
+                        <a href="#" onclick="showPage('localMarketPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Local Market</a>
+                        <a href="#" onclick="showPage('foodDiningPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Food & Dining</a>
+                        <a href="#" onclick="showPage('galleryPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Gallery</a>
+                        <button onclick="showLogin()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Login</button>
+                        <button onclick="showSOS()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition">SOS</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="pt-24 pb-16 min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 relative overflow-hidden">
+            <!-- Tech Background Pattern -->
+            <div class="absolute inset-0 opacity-10">
+                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="white" stroke-width="1"/>
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)"/>
+                </svg>
+            </div>
+            <div class="absolute top-10 left-10 w-32 h-32 bg-blue-500 rounded-full opacity-20 animate-pulse"></div>
+            <div class="absolute bottom-20 right-20 w-24 h-24 bg-purple-500 rounded-full opacity-20 animate-pulse"></div>
+            <div class="absolute top-1/2 left-1/4 w-16 h-16 bg-green-500 rounded-full opacity-20 animate-pulse"></div>
+            <div class="relative z-10">
+            <div class="container mx-auto px-6">
+                <h1 class="text-4xl font-bold text-center mb-16 text-white">AI Trip Planner</h1>
+                
+                <div class="max-w-4xl mx-auto">
+                    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Plan Your Perfect Trip</h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Number of Days</label>
+                                <select id="tripDays" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <option value="3">3 Days</option>
+                                    <option value="5">5 Days</option>
+                                    <option value="7">7 Days</option>
+                                    <option value="10">10 Days</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Number of Members</label>
+                                <select id="tripMembers" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <option value="1">Solo</option>
+                                    <option value="2">Couple</option>
+                                    <option value="4">Family (4)</option>
+                                    <option value="6">Group (6+)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Budget Range</label>
+                            <select id="tripBudget" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="budget">Budget (₹5,000-15,000)</option>
+                                <option value="mid">Mid-range (₹15,000-30,000)</option>
+                                <option value="luxury">Luxury (₹30,000+)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Trip Type</label>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" value="spiritual" class="trip-type">
+                                    <span>🙏 Spiritual</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" value="adventure" class="trip-type">
+                                    <span>🏔️ Adventure</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" value="nature" class="trip-type">
+                                    <span>🌲 Nature</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" value="cultural" class="trip-type">
+                                    <span>🎨 Cultural</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button onclick="generateTripPlan()" class="w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-green-700 transition">
+                            Generate Trip Plan
+                        </button>
+                    </div>
+                    
+                    <div id="tripPlan" class="bg-white rounded-2xl shadow-xl p-8 hidden">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Your Personalized Trip Plan</h2>
+                        <div id="tripPlanContent"></div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Book Tickets Page -->
+    <div id="bookTicketsPage" class="page">
+        <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 shadow-lg">
+            <div class="container mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold text-green-700">Jharkhand Tourism</h1>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="#" onclick="showPage('mainPage')" class="nav-link nav-active px-3 py-2 rounded-lg">Home</a>
+                        <a href="#" onclick="showPage('destinationsPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Destinations</a>
+                        <a href="#" onclick="showPage('tripPlannerPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Trip Planner</a>
+                        <a href="#" onclick="showPage('bookTicketsPage')" class="nav-link nav-active px-3 py-2 rounded-lg">Book Tickets</a>
+                        <a href="#" onclick="showPage('localMarketPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Local Market</a>
+                        <a href="#" onclick="showPage('foodDiningPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Food & Dining</a>
+                        <a href="#" onclick="showPage('galleryPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Gallery</a>
+                        <button onclick="showLogin()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Login</button>
+                        <button onclick="showSOS()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition">SOS</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="pt-24 pb-16 min-h-screen bg-gray-50">
+            <div class="container mx-auto px-6">
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <!-- Booking Options -->
+                    <div>
+                        <h1 class="text-4xl font-bold mb-8 text-gray-800">Book Your Journey</h1>
+                        
+                        <div class="grid grid-cols-2 gap-6 mb-8">
+                            <div onclick="showBookingForm('flight')" class="bg-white p-8 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition transform hover:scale-105">
+                                <div class="text-6xl mb-4 text-center">✈️</div>
+                                <h3 class="text-xl font-semibold text-center mb-2">Book Flight</h3>
+                                <p class="text-sm text-gray-600 text-center">Domestic & International flights</p>
+                            </div>
+                            
+                            <div onclick="showBookingForm('train')" class="bg-white p-8 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition transform hover:scale-105">
+                                <div class="text-6xl mb-4 text-center">🚂</div>
+                                <h3 class="text-xl font-semibold text-center mb-2">Book Train</h3>
+                                <p class="text-sm text-gray-600 text-center">Railway reservations</p>
+                            </div>
+                            
+                            <div onclick="showBookingForm('car')" class="bg-white p-8 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition transform hover:scale-105">
+                                <div class="text-6xl mb-4 text-center">🚗</div>
+                                <h3 class="text-xl font-semibold text-center mb-2">Book Car</h3>
+                                <p class="text-sm text-gray-600 text-center">Self-drive & chauffeur</p>
+                            </div>
+                            
+                            <div onclick="showBookingForm('bike')" class="bg-white p-8 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition transform hover:scale-105">
+                                <div class="text-6xl mb-4 text-center">🏍️</div>
+                                <h3 class="text-xl font-semibold text-center mb-2">Rent Bike</h3>
+                                <p class="text-sm text-gray-600 text-center">Two-wheeler rentals</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h2 class="text-2xl font-bold mb-6 text-gray-800">Quick Bookings</h2>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button onclick="quickBook('hotel')" class="bg-green-500 text-white py-4 px-6 rounded-lg hover:bg-green-600 transition transform hover:scale-105">
+                                    <div class="text-2xl mb-2">🏨</div>
+                                    <div class="font-semibold">Hotels</div>
+                                </button>
+                                <button onclick="quickBook('guide')" class="bg-orange-500 text-white py-4 px-6 rounded-lg hover:bg-orange-600 transition transform hover:scale-105">
+                                    <div class="text-2xl mb-2">👨‍🏫</div>
+                                    <div class="font-semibold">Tour Guide</div>
+                                </button>
+                                <button onclick="quickBook('bus')" class="bg-purple-500 text-white py-4 px-6 rounded-lg hover:bg-purple-600 transition transform hover:scale-105">
+                                    <div class="text-2xl mb-2">🚌</div>
+                                    <div class="font-semibold">Bus Tickets</div>
+                                </button>
+                                <button onclick="quickBook('package')" class="bg-indigo-500 text-white py-4 px-6 rounded-lg hover:bg-indigo-600 transition transform hover:scale-105">
+                                    <div class="text-2xl mb-2">📦</div>
+                                    <div class="font-semibold">Tour Package</div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Offline Map -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800">Jharkhand Map</h2>
+                        <div class="bg-gradient-to-br from-green-200 to-blue-200 rounded-lg h-96 flex items-center justify-center relative">
+                            <svg viewBox="0 0 400 300" class="w-full h-full">
+                                <path d="M50,50 L350,50 L350,250 L50,250 Z" fill="#22c55e" opacity="0.3"/>
+                                <circle cx="200" cy="150" r="8" fill="#dc2626"/>
+                                <text x="210" y="155" class="text-xs font-bold">Ranchi</text>
+                                <circle cx="150" cy="100" r="6" fill="#2563eb"/>
+                                <text x="160" y="105" class="text-xs">Jamshedpur</text>
+                                <circle cx="250" cy="120" r="6" fill="#2563eb"/>
+                                <text x="260" y="125" class="text-xs">Dhanbad</text>
+                                <circle cx="180" cy="200" r="6" fill="#2563eb"/>
+                                <text x="190" y="205" class="text-xs">Deoghar</text>
+                                <circle cx="120" cy="180" r="6" fill="#2563eb"/>
+                                <text x="130" y="185" class="text-xs">Hazaribagh</text>
+                            </svg>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-600">
+                            <p>🔴 Capital City</p>
+                            <p>🔵 Major Destinations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Local Market Page -->
+    <div id="localMarketPage" class="page">
+        <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 shadow-lg">
+            <div class="container mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold text-green-700">Jharkhand Tourism</h1>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="#" onclick="showPage('mainPage')" class="nav-link nav-active px-3 py-2 rounded-lg">Home</a>
+                        <a href="#" onclick="showPage('destinationsPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Destinations</a>
+                        <a href="#" onclick="showPage('tripPlannerPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Trip Planner</a>
+                        <a href="#" onclick="showPage('bookTicketsPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Book Tickets</a>
+                        <a href="#" onclick="showPage('localMarketPage')" class="nav-link nav-active px-3 py-2 rounded-lg">Local Market</a>
+                        <a href="#" onclick="showPage('foodDiningPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Food & Dining</a>
+                        <a href="#" onclick="showPage('galleryPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Gallery</a>
+                        <button onclick="showLogin()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Login</button>
+                        <button onclick="showSOS()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition">SOS</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="pt-24 pb-16">
+            <div class="container mx-auto px-6">
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <!-- Local Products -->
+                    <div>
+                        <h1 class="text-4xl font-bold mb-8 text-gray-800">Local Market</h1>
+                        
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                                <div class="h-64 bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-6xl">⛓️</div>
+                                <div class="p-6">
+                                    <h3 class="font-semibold text-lg">Silver Chains</h3>
+                                    <p class="text-sm text-gray-600 mb-2">Traditional tribal jewelry</p>
+                                    <p class="text-lg font-bold text-green-600">₹2,500 - ₹15,000</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                                <div class="h-64 bg-gradient-to-br from-red-400 to-pink-500 flex items-center justify-center text-6xl">🎭</div>
+                                <div class="p-6">
+                                    <h3 class="font-semibold text-lg">Handcraft Masks</h3>
+                                    <p class="text-sm text-gray-600 mb-2">Authentic tribal masks</p>
+                                    <p class="text-lg font-bold text-green-600">₹800 - ₹3,500</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                                <div class="h-64 bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center text-6xl">📜</div>
+                                <div class="p-6">
+                                    <h3 class="font-semibold text-lg">Poetry Books</h3>
+                                    <p class="text-sm text-gray-600 mb-2">Local literature</p>
+                                    <p class="text-lg font-bold text-green-600">₹150 - ₹500</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                                <div class="h-64 bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center text-6xl">🏺</div>
+                                <div class="p-6">
+                                    <h3 class="font-semibold text-lg">Pottery</h3>
+                                    <p class="text-sm text-gray-600 mb-2">Traditional earthenware</p>
+                                    <p class="text-lg font-bold text-green-600">₹300 - ₹2,000</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                                <div class="h-64 bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center text-6xl">🧵</div>
+                                <div class="p-6">
+                                    <h3 class="font-semibold text-lg">Textiles</h3>
+                                    <p class="text-sm text-gray-600 mb-2">Handwoven fabrics</p>
+                                    <p class="text-lg font-bold text-green-600">₹1,200 - ₹8,000</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                                <div class="h-64 bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center text-6xl">🎨</div>
+                                <div class="p-6">
+                                    <h3 class="font-semibold text-lg">Paintings</h3>
+                                    <p class="text-sm text-gray-600 mb-2">Tribal art</p>
+                                    <p class="text-lg font-bold text-green-600">₹500 - ₹5,000</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Festival Calendar -->
+                    <div class="bg-gradient-to-br from-red-900 to-red-800 rounded-xl shadow-lg p-8 text-white h-full">
+                        <h2 class="text-3xl font-bold mb-8 text-center text-white">Festival Calendar</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="border-l-4 border-yellow-400 pl-4 bg-white/10 p-3 rounded-r-lg">
+                                <h3 class="font-semibold text-yellow-300 text-lg">Sarhul Festival</h3>
+                                <p class="text-white/80 text-sm">March-April • Spring Festival</p>
+                            </div>
+                            
+                            <div class="border-l-4 border-blue-400 pl-4 bg-white/10 p-3 rounded-r-lg">
+                                <h3 class="font-semibold text-blue-300 text-lg">Karma Festival</h3>
+                                <p class="text-white/80 text-sm">August-September • Harvest Festival</p>
+                            </div>
+                            
+                            <div class="border-l-4 border-green-400 pl-4 bg-white/10 p-3 rounded-r-lg">
+                                <h3 class="font-semibold text-green-300 text-lg">Sohrai Festival</h3>
+                                <p class="text-white/80 text-sm">October-November • Cattle Festival</p>
+                            </div>
+                            
+                            <div class="border-l-4 border-purple-400 pl-4 bg-white/10 p-3 rounded-r-lg">
+                                <h3 class="font-semibold text-purple-300 text-lg">Tusu Festival</h3>
+                                <p class="text-white/80 text-sm">December-January • Winter Festival</p>
+                            </div>
+                            
+                            <div class="border-l-4 border-orange-400 pl-4 bg-white/10 p-3 rounded-r-lg">
+                                <h3 class="font-semibold text-orange-300 text-lg">Baha Festival</h3>
+                                <p class="text-white/80 text-sm">February-March • Flower Festival</p>
+                            </div>
+                            
+                            <div class="border-l-4 border-pink-400 pl-4 bg-white/10 p-3 rounded-r-lg">
+                                <h3 class="font-semibold text-pink-300 text-lg">Jani Shikar</h3>
+                                <p class="text-white/80 text-sm">May-June • Hunting Festival</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Food & Dining Page -->
+    <div id="foodDiningPage" class="page">
+        <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 shadow-lg">
+            <div class="container mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold text-green-700">Jharkhand Tourism</h1>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="#" onclick="showPage('mainPage')" class="nav-link nav-active px-3 py-2 rounded-lg">Home</a>
+                        <a href="#" onclick="showPage('destinationsPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Destinations</a>
+                        <a href="#" onclick="showPage('tripPlannerPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Trip Planner</a>
+                        <a href="#" onclick="showPage('bookTicketsPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Book Tickets</a>
+                        <a href="#" onclick="showPage('localMarketPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Local Market</a>
+                        <a href="#" onclick="showPage('foodDiningPage')" class="nav-link nav-active px-3 py-2 rounded-lg">Food & Dining</a>
+                        <a href="#" onclick="showPage('galleryPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Gallery</a>
+                        <button onclick="showLogin()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Login</button>
+                        <button onclick="showSOS()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition">SOS</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="pt-24 pb-16">
+            <div class="container mx-auto px-6">
+                <div class="grid lg:grid-cols-2 gap-12 mb-16">
+                    <!-- Must Try Foods -->
+                    <div>
+                        <h1 class="text-4xl font-bold mb-8 text-gray-800">Must Try Foods</h1>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-white rounded-xl shadow-lg p-8 flex items-center space-x-6">
+                                <div class="text-8xl">🍛</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-semibold mb-2">Litti Chokha</h3>
+                                    <p class="text-gray-600 mb-2">Traditional roasted wheat balls with spiced vegetables</p>
+                                    <p class="text-lg font-bold text-green-600">₹80 - ₹150</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl shadow-lg p-8 flex items-center space-x-6">
+                                <div class="text-8xl">🍚</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-semibold mb-2">Dhuska</h3>
+                                    <p class="text-gray-600 mb-2">Deep-fried rice and lentil pancakes</p>
+                                    <p class="text-lg font-bold text-green-600">₹60 - ₹120</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl shadow-lg p-8 flex items-center space-x-6">
+                                <div class="text-8xl">🥘</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-semibold mb-2">Rugra</h3>
+                                    <p class="text-gray-600 mb-2">Wild mushroom curry, a tribal delicacy</p>
+                                    <p class="text-lg font-bold text-green-600">₹120 - ₹200</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl shadow-lg p-8 flex items-center space-x-6">
+                                <div class="text-8xl">🍖</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-semibold mb-2">Mutton Curry</h3>
+                                    <p class="text-gray-600 mb-2">Spicy goat meat curry with local spices</p>
+                                    <p class="text-lg font-bold text-green-600">₹250 - ₹400</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Street Food -->
+                    <div>
+                        <h2 class="text-4xl font-bold mb-8 text-gray-800">Street Food</h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-white rounded-xl shadow-lg p-8 flex items-center space-x-6">
+                                <div class="text-8xl">🥟</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-semibold mb-2">Thekua</h3>
+                                    <p class="text-gray-600 mb-2">Sweet crispy cookies made with jaggery</p>
+                                    <p class="text-lg font-bold text-green-600">₹30 - ₹80</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl shadow-lg p-8 flex items-center space-x-6">
+                                <div class="text-8xl">🍡</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-semibold mb-2">Pitha</h3>
+                                    <p class="text-gray-600 mb-2">Rice flour dumplings with sweet filling</p>
+                                    <p class="text-lg font-bold text-green-600">₹40 - ₹100</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl shadow-lg p-8 flex items-center space-x-6">
+                                <div class="text-8xl">🥤</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-semibold mb-2">Handia</h3>
+                                    <p class="text-gray-600 mb-2">Traditional rice beer</p>
+                                    <p class="text-lg font-bold text-green-600">₹50 - ₹120</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl shadow-lg p-8 flex items-center space-x-6">
+                                <div class="text-8xl">🍯</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-semibold mb-2">Mahua</h3>
+                                    <p class="text-gray-600 mb-2">Sweet drink made from mahua flowers</p>
+                                    <p class="text-lg font-bold text-green-600">₹25 - ₹60</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Top Restaurants -->
+                <div>
+                    <h2 class="text-3xl font-bold mb-8 text-gray-800 text-center">Top Restaurants</h2>
+                    
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div onclick="showRestaurantDetails('Kaveri Restaurant', 'Main Road, Ranchi', 'Traditional Jharkhandi cuisine', '4.5/5 stars', 'Open: 11 AM - 11 PM', 'Famous for Litti Chokha and Mutton Curry')" class="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition transform hover:scale-105">
+                            <div class="h-64 bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-8xl">🍽️</div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold mb-2">Kaveri Restaurant</h3>
+                                <p class="text-gray-600 mb-2">📍 Main Road, Ranchi</p>
+                                <p class="text-sm text-gray-500">Traditional Jharkhandi cuisine</p>
+                                <p class="text-lg font-bold text-green-600 mt-2">₹200 - ₹500 per person</p>
+                            </div>
+                        </div>
+                        
+                        <div onclick="showRestaurantDetails('Hotel Yuvraj Palace', 'Station Road, Jamshedpur', 'Multi-cuisine restaurant', '4.2/5 stars', 'Open: 7 AM - 12 AM', 'Known for North Indian and Chinese dishes')" class="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition transform hover:scale-105">
+                            <div class="h-64 bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-8xl">🏨</div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold mb-2">Hotel Yuvraj Palace</h3>
+                                <p class="text-gray-600 mb-2">📍 Station Road, Jamshedpur</p>
+                                <p class="text-sm text-gray-500">Multi-cuisine restaurant</p>
+                                <p class="text-lg font-bold text-green-600 mt-2">₹300 - ₹800 per person</p>
+                            </div>
+                        </div>
+                        
+                        <div onclick="showRestaurantDetails('Tribal Kitchen', 'Circular Road, Dhanbad', 'Authentic tribal food', '4.7/5 stars', 'Open: 12 PM - 10 PM', 'Specializes in Rugra and traditional tribal dishes')" class="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition transform hover:scale-105">
+                            <div class="h-64 bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-8xl">🍴</div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold mb-2">Tribal Kitchen</h3>
+                                <p class="text-gray-600 mb-2">📍 Circular Road, Dhanbad</p>
+                                <p class="text-sm text-gray-500">Authentic tribal food</p>
+                                <p class="text-lg font-bold text-green-600 mt-2">₹150 - ₹400 per person</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Page -->
+    <div id="galleryPage" class="page">
+        <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 shadow-lg">
+            <div class="container mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold text-green-700">Jharkhand Tourism</h1>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="#" onclick="showPage('mainPage')" class="nav-link nav-active px-3 py-2 rounded-lg">Home</a>
+                        <a href="#" onclick="showPage('destinationsPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Destinations</a>
+                        <a href="#" onclick="showPage('tripPlannerPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Trip Planner</a>
+                        <a href="#" onclick="showPage('bookTicketsPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Book Tickets</a>
+                        <a href="#" onclick="showPage('localMarketPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Local Market</a>
+                        <a href="#" onclick="showPage('foodDiningPage')" class="nav-link px-3 py-2 rounded-lg hover:bg-blue-500 hover:text-white transition">Food & Dining</a>
+                        <a href="#" onclick="showPage('galleryPage')" class="nav-link nav-active px-3 py-2 rounded-lg">Gallery</a>
+                        <button onclick="showLogin()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Login</button>
+                        <button onclick="showSOS()" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition">SOS</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="pt-24 pb-16">
+            <div class="container mx-auto px-6">
+                <h1 class="text-4xl font-bold text-center mb-16 text-gray-800">Photo Gallery</h1>
+                
+                <div class="grid md:grid-cols-3 gap-8 mb-16" id="galleryGrid">
+                    <!-- Gallery images will be loaded here -->
+                </div>
+                
+                <div class="text-center" id="galleryViewMore">
+                    <button onclick="loadMoreGallery()" id="galleryViewMoreBtn" class="bg-green-600 text-white px-12 py-4 rounded-full font-semibold text-lg hover:bg-green-700 transition transform hover:scale-105">View More Photos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800">Welcome</h2>
+                    <p class="text-gray-600">Choose your option</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <button onclick="showSignIn()" class="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition">Sign In</button>
+                    <button onclick="showSignUp()" class="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition">Sign Up</button>
+                    <button onclick="closeLogin()" class="w-full bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition">Cancel</button>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sign In Modal -->
+    <div id="signInModal" class="login-modal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+                <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">Sign In</h2>
+                
+                <form onsubmit="handleSignIn(event)">
+                    <div class="space-y-4">
+                        <input type="text" placeholder="Email / Phone / Username" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        <input type="password" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition">Sign In</button>
+                        <button type="button" onclick="closeLogin()" class="w-full bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sign Up Modal -->
+    <div id="signUpModal" class="login-modal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+                <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">Sign Up</h2>
+                
+                <form onsubmit="handleSignUp(event)">
+                    <div class="space-y-4">
+                        <input type="text" placeholder="Full Name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
+                        <input type="email" placeholder="Email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
+                        <input type="tel" placeholder="Phone Number" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
+                        <input type="password" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
+                        <input type="password" placeholder="Confirm Password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
+                        <button type="submit" class="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition">Sign Up</button>
+                        <button type="button" onclick="closeLogin()" class="w-full bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="booking-modal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8">
+                <h2 class="text-3xl font-bold text-center mb-8 text-gray-800" id="bookingTitle">Book Flight</h2>
+                
+                <form onsubmit="handleBooking(event)">
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <input type="text" placeholder="From" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        <input type="text" placeholder="To" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        <input type="date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        <input type="number" placeholder="Passengers" min="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Payment Details</h3>
+                        <div class="space-y-4">
+                            <input type="text" placeholder="Card Number" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                            <div class="grid grid-cols-2 gap-4">
+                                <input type="text" placeholder="MM/YY" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                <input type="text" placeholder="CVV" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <input type="text" placeholder="Cardholder Name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-4">
+                        <button type="submit" class="flex-1 bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition">Complete Booking</button>
+                        <button type="button" onclick="closeBooking()" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOS Modal -->
+    <div id="sosModal" class="login-modal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-red-600 mb-2">🚨 Emergency SOS</h2>
+                    <p class="text-gray-600">Get immediate help</p>
+                </div>
+                
+                <div class="space-y-4 mb-6">
+                    <button onclick="callEmergency('police')" class="w-full bg-blue-500 text-white py-4 rounded-lg font-semibold hover:bg-blue-600 transition flex items-center justify-center space-x-3">
+                        <span class="text-2xl">👮‍♂️</span>
+                        <div class="text-left">
+                            <div>Police</div>
+                            <div class="text-sm opacity-80">100</div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="callEmergency('fire')" class="w-full bg-red-500 text-white py-4 rounded-lg font-semibold hover:bg-red-600 transition flex items-center justify-center space-x-3">
+                        <span class="text-2xl">🚒</span>
+                        <div class="text-left">
+                            <div>Fire Brigade</div>
+                            <div class="text-sm opacity-80">101</div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="callEmergency('ambulance')" class="w-full bg-green-500 text-white py-4 rounded-lg font-semibold hover:bg-green-600 transition flex items-center justify-center space-x-3">
+                        <span class="text-2xl">🚑</span>
+                        <div class="text-left">
+                            <div>Ambulance</div>
+                            <div class="text-sm opacity-80">108</div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="callEmergency('tourist')" class="w-full bg-purple-500 text-white py-4 rounded-lg font-semibold hover:bg-purple-600 transition flex items-center justify-center space-x-3">
+                        <span class="text-2xl">🏛️</span>
+                        <div class="text-left">
+                            <div>Tourist Helpline</div>
+                            <div class="text-sm opacity-80">1363</div>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="border-t pt-6">
+                    <button onclick="shareLocation()" class="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition mb-4">
+                        📍 Share My Location
+                    </button>
+                    <button onclick="closeSOS()" class="w-full bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let destinationsLoaded = 9;
+        let galleryLoaded = 9;
+        let chatbotOpen = false;
+        
+        const destinations = [
+            {name: "Netarhat", emoji: "🏔️", color: "from-blue-400 to-blue-600", description: "Queen of Chotanagpur, famous for sunrise and sunset views"},
+            {name: "Hundru Falls", emoji: "💧", color: "from-green-400 to-green-600", description: "98-meter high waterfall, perfect for nature lovers"},
+            {name: "Deoghar", emoji: "🏛️", color: "from-orange-400 to-orange-600", description: "Sacred city with Baidyanath Temple"},
+            {name: "Betla National Park", emoji: "🌲", color: "from-purple-400 to-purple-600", description: "Wildlife sanctuary with tigers and elephants"},
+            {name: "Parasnath Hill", emoji: "⛰️", color: "from-red-400 to-red-600", description: "Highest peak in Jharkhand, Jain pilgrimage site"},
+            {name: "Hazaribagh", emoji: "🏞️", color: "from-teal-400 to-teal-600", description: "Land of thousand gardens"},
+            {name: "Dassam Falls", emoji: "🌊", color: "from-indigo-400 to-indigo-600", description: "Beautiful waterfall near Ranchi"},
+            {name: "Jonha Falls", emoji: "💦", color: "from-pink-400 to-pink-600", description: "Scenic waterfall with temple nearby"},
+            {name: "Rajrappa Temple", emoji: "🛕", color: "from-yellow-400 to-yellow-600", description: "Ancient temple at confluence of rivers"},
+            {name: "Maithon Dam", emoji: "🏗️", color: "from-cyan-400 to-cyan-600", description: "Beautiful dam with boating facilities"},
+            {name: "Jagannath Temple", emoji: "🕉️", color: "from-lime-400 to-lime-600", description: "Replica of Puri Jagannath Temple"},
+            {name: "Kanke Dam", emoji: "🌅", color: "from-rose-400 to-rose-600", description: "Scenic spot for picnics and boating"},
+            {name: "Patratu Valley", emoji: "🏔️", color: "from-emerald-400 to-emerald-600", description: "Kashmir of Jharkhand"},
+            {name: "Lodh Falls", emoji: "💧", color: "from-violet-400 to-violet-600", description: "Highest waterfall in Jharkhand"},
+            {name: "Palamu Tiger Reserve", emoji: "🐅", color: "from-amber-400 to-amber-600", description: "First tiger reserve of Jharkhand"}
+        ];
+        
+        const galleryImages = [
+            {name: "Netarhat Hills", emoji: "🏔️", color: "from-blue-400 to-blue-600"},
+            {name: "Hundru Falls", emoji: "💧", color: "from-green-400 to-green-600"},
+            {name: "Deoghar Temple", emoji: "🏛️", color: "from-orange-400 to-orange-600"},
+            {name: "Betla Forest", emoji: "🌲", color: "from-purple-400 to-purple-600"},
+            {name: "Parasnath Peak", emoji: "⛰️", color: "from-red-400 to-red-600"},
+            {name: "Hazaribagh Gardens", emoji: "🏞️", color: "from-teal-400 to-teal-600"},
+            {name: "Dassam Falls", emoji: "🌊", color: "from-indigo-400 to-indigo-600"},
+            {name: "Jonha Falls", emoji: "💦", color: "from-pink-400 to-pink-600"},
+            {name: "Rajrappa Temple", emoji: "🛕", color: "from-yellow-400 to-yellow-600"},
+            {name: "Maithon Dam", emoji: "🏗️", color: "from-cyan-400 to-cyan-600"},
+            {name: "Jagannath Temple", emoji: "🕉️", color: "from-lime-400 to-lime-600"},
+            {name: "Kanke Dam", emoji: "🌅", color: "from-rose-400 to-rose-600"},
+            {name: "Patratu Valley", emoji: "🏔️", color: "from-emerald-400 to-emerald-600"},
+            {name: "Lodh Falls", emoji: "💧", color: "from-violet-400 to-violet-600"},
+            {name: "Palamu Reserve", emoji: "🐅", color: "from-amber-400 to-amber-600"},
+            {name: "Tribal Village", emoji: "👥", color: "from-indigo-400 to-indigo-600"},
+            {name: "Sunset View", emoji: "🌅", color: "from-orange-400 to-red-600"},
+            {name: "Wildlife", emoji: "🦋", color: "from-green-400 to-teal-600"}
+        ];
+
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('nav-active');
+            });
+            
+            // Highlight current page
+            const pageMap = {
+                'mainPage': 'Home',
+                'destinationsPage': 'Destinations',
+                'tripPlannerPage': 'Trip Planner',
+                'bookTicketsPage': 'Book Tickets',
+                'localMarketPage': 'Local Market',
+                'foodDiningPage': 'Food & Dining',
+                'galleryPage': 'Gallery'
+            };
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.textContent.trim() === pageMap[pageId]) {
+                    link.classList.add('nav-active');
+                }
+            });
+            
+            // Load destinations if needed
+            if (pageId === 'destinationsPage') {
+                loadDestinations();
+            }
+        }
+        
+        function toggleChatbot() {
+            const chatWindow = document.getElementById('chatbotWindow');
+            chatbotOpen = !chatbotOpen;
+            
+            if (chatbotOpen) {
+                chatWindow.classList.remove('hidden');
+            } else {
+                chatWindow.classList.add('hidden');
+            }
+        }
+        
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (message === '') return;
+            
+            // Add user message
+            addChatMessage(message, 'user');
+            input.value = '';
+            
+            // Generate bot response
+            setTimeout(() => {
+                const response = generateBotResponse(message);
+                addChatMessage(response, 'bot');
+            }, 1000);
+        }
+        
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+        
+        function addChatMessage(message, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            
+            if (sender === 'user') {
+                messageDiv.className = 'bg-green-100 p-2 rounded-lg ml-8';
+                messageDiv.innerHTML = `<p class="text-sm text-right">${message}</p>`;
+            } else {
+                messageDiv.className = 'bg-gray-100 p-2 rounded-lg mr-8';
+                messageDiv.innerHTML = `<p class="text-sm">${message}</p>`;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function generateBotResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('destination') || lowerMessage.includes('place') || lowerMessage.includes('visit')) {
+                return "🏔️ Jharkhand has amazing destinations! Try Netarhat for sunrise views, Hundru Falls for nature lovers, or Deoghar for spiritual experiences. Which type of destination interests you?";
+            } else if (lowerMessage.includes('hotel') || lowerMessage.includes('stay') || lowerMessage.includes('accommodation')) {
+                return "🏨 I can help you find great accommodations! Jharkhand offers budget hotels (₹1,500-3,000), mid-range (₹3,000-6,000), and luxury options (₹6,000+). What's your budget range?";
+            } else if (lowerMessage.includes('food') || lowerMessage.includes('eat') || lowerMessage.includes('restaurant')) {
+                return "🍛 You must try Litti Chokha, Dhuska, and Rugra! For restaurants, I recommend Kaveri Restaurant in Ranchi or Tribal Kitchen in Dhanbad. What cuisine are you craving?";
+            } else if (lowerMessage.includes('weather') || lowerMessage.includes('climate')) {
+                return "🌤️ Jharkhand has a pleasant climate! Best time to visit is October to March. Current weather in Ranchi: 24°C, partly cloudy. Check the weather widget for updates!";
+            } else if (lowerMessage.includes('transport') || lowerMessage.includes('travel') || lowerMessage.includes('bus') || lowerMessage.includes('train')) {
+                return "🚂 You can reach Jharkhand by train (Ranchi, Jamshedpur stations), bus, or flight (Birsa Munda Airport). Local transport includes buses, taxis, and auto-rickshaws. Need specific route help?";
+            } else if (lowerMessage.includes('festival') || lowerMessage.includes('culture')) {
+                return "🎭 Jharkhand celebrates beautiful festivals! Sarhul (Spring), Karma (Harvest), Sohrai (Cattle), and Tusu (Winter) are major tribal festivals. Check our festival calendar for dates!";
+            } else if (lowerMessage.includes('book') || lowerMessage.includes('ticket') || lowerMessage.includes('reservation')) {
+                return "🎫 I can help you book tickets! Use our booking section for flights, trains, hotels, and tour packages. Do you need help with a specific booking?";
+            } else if (lowerMessage.includes('emergency') || lowerMessage.includes('help') || lowerMessage.includes('sos')) {
+                return "🚨 For emergencies, use our SOS button! Police: 100, Fire: 101, Ambulance: 108, Tourist Helpline: 1363. Stay safe and don't hesitate to ask for help!";
+            } else {
+                return "👋 I'm here to help with your Jharkhand travel plans! Ask me about destinations, hotels, food, weather, transport, festivals, or bookings. What would you like to know?";
+            }
+        }
+
+        function loadDestinations() {
+            const grid = document.getElementById('destinationGrid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < Math.min(destinationsLoaded, destinations.length); i++) {
+                const dest = destinations[i];
+                const card = document.createElement('div');
+                card.className = 'destination-card relative group cursor-pointer rounded-xl overflow-hidden shadow-lg';
+                card.innerHTML = `
+                    <div class="h-[600px] bg-gradient-to-br ${dest.color} flex items-center justify-center">
+                        <span class="text-white text-8xl">${dest.emoji}</span>
+                    </div>
+                    <div class="absolute inset-0 bg-black/40 flex items-end">
+                        <div class="p-6 text-white w-full">
+                            <h3 class="text-xl font-bold">${dest.name}</h3>
+                            <button onclick="showDestinationDetails('${dest.name}', '${dest.description}')" class="explore-btn absolute top-4 right-4 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm">Explore</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            }
+            
+            // Hide view more button if all destinations loaded
+            if (destinationsLoaded >= destinations.length) {
+                document.getElementById('viewMoreBtn').style.display = 'none';
+            }
+        }
+        
+        function loadGallery() {
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < Math.min(galleryLoaded, galleryImages.length); i++) {
+                const img = galleryImages[i];
+                const card = document.createElement('div');
+                card.className = 'relative cursor-pointer rounded-xl overflow-hidden shadow-lg transform hover:scale-105 transition';
+                card.innerHTML = `
+                    <div class="h-[75vh] bg-gradient-to-br ${img.color} flex items-center justify-center relative">
+                        <span class="text-white text-8xl">${img.emoji}</span>
+                        <div class="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-4">
+                            <h3 class="text-xl font-bold">${img.name}</h3>
+                        </div>
+                    </div>
+                `;
+                card.onclick = () => showPlaceDetails(img.name);
+                grid.appendChild(card);
+            }
+            
+            // Hide view more button if all images loaded
+            if (galleryLoaded >= galleryImages.length) {
+                document.getElementById('galleryViewMoreBtn').style.display = 'none';
+            }
+        }
+        
+        function loadMoreGallery() {
+            galleryLoaded = Math.min(galleryLoaded + 6, galleryImages.length);
+            loadGallery();
+        }
+        
+        function showPlaceDetails(placeName) {
+            alert(`${placeName}\n\nClick to explore this beautiful destination and plan your visit!`);
+        }
+
+        function loadMoreDestinations() {
+            destinationsLoaded = Math.min(destinationsLoaded + 6, destinations.length);
+            loadDestinations();
+        }
+
+        function showDestinationDetails(name, description) {
+            alert(`${name}\n\n${description}`);
+        }
+
+        function toggleWeather() {
+            const details = document.getElementById('weatherDetails');
+            details.style.display = details.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function showLogin() {
+            if (currentUser) {
+                // User is logged in, show logout option
+                if (confirm('Do you want to logout?')) {
+                    currentUser = null;
+                    updateLoginButton();
+                }
+            } else {
+                document.getElementById('loginModal').style.display = 'block';
+            }
+        }
+
+        function showSignIn() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('signInModal').style.display = 'block';
+        }
+
+        function showSignUp() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('signUpModal').style.display = 'block';
+        }
+
+        function closeLogin() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('signInModal').style.display = 'none';
+            document.getElementById('signUpModal').style.display = 'none';
+        }
+
+        function handleSignIn(event) {
+            event.preventDefault();
+            currentUser = { name: 'User', email: 'user@example.com' };
+            updateLoginButton();
+            closeLogin();
+            alert('Successfully signed in!');
+        }
+
+        function handleSignUp(event) {
+            event.preventDefault();
+            alert('Verification email sent! Please check your email and phone for verification.');
+            closeLogin();
+        }
+
+        function updateLoginButton() {
+            const loginBtns = document.querySelectorAll('[id^="loginBtn"]');
+            loginBtns.forEach(btn => {
+                btn.textContent = currentUser ? 'Logout' : 'Login';
+                btn.className = currentUser ? 
+                    'bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition' :
+                    'bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition';
+            });
+        }
+
+        function showBookingForm(type) {
+            if (!currentUser) {
+                alert('Please login first to book tickets.');
+                showLogin();
+                return;
+            }
+            
+            const titles = {
+                flight: 'Book Flight',
+                train: 'Book Train',
+                car: 'Book Car',
+                bike: 'Rent Bike'
+            };
+            
+            document.getElementById('bookingTitle').textContent = titles[type];
+            document.getElementById('bookingModal').style.display = 'block';
+        }
+
+        function closeBooking() {
+            document.getElementById('bookingModal').style.display = 'none';
+        }
+
+        function handleBooking(event) {
+            event.preventDefault();
+            alert('Booking confirmed! You will receive confirmation details via email and SMS.');
+            closeBooking();
+        }
+
+        function generateTripPlan() {
+            const days = document.getElementById('tripDays').value;
+            const members = document.getElementById('tripMembers').value;
+            const budget = document.getElementById('tripBudget').value;
+            const types = Array.from(document.querySelectorAll('.trip-type:checked')).map(cb => cb.value);
+            
+            const planContent = document.getElementById('tripPlanContent');
+            const tripPlan = document.getElementById('tripPlan');
+            
+            let plan = `
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-green-600 mb-2">Your ${days}-Day Jharkhand Adventure</h3>
+                    <p class="text-gray-600">For ${members} ${members == 1 ? 'person' : 'people'} • ${budget.charAt(0).toUpperCase() + budget.slice(1)} budget</p>
+                </div>
+            `;
+            
+            for (let i = 1; i <= parseInt(days); i++) {
+                plan += `
+                    <div class="mb-6 p-4 border-l-4 border-green-500 bg-green-50">
+                        <h4 class="font-bold text-lg mb-2">Day ${i}</h4>
+                        <ul class="space-y-1 text-gray-700">
+                `;
+                
+                if (i === 1) {
+                    plan += `<li>• Arrive in Ranchi, check into hotel</li>`;
+                    if (types.includes('nature')) plan += `<li>• Visit Rock Garden and Kanke Dam</li>`;
+                    if (types.includes('spiritual')) plan += `<li>• Evening visit to Jagannath Temple</li>`;
+                } else if (i === 2) {
+                    if (types.includes('nature')) plan += `<li>• Day trip to Hundru Falls</li>`;
+                    if (types.includes('adventure')) plan += `<li>• Trekking and photography</li>`;
+                    plan += `<li>• Local market shopping</li>`;
+                } else if (i === 3) {
+                    if (types.includes('spiritual')) plan += `<li>• Visit Deoghar and Baidyanath Temple</li>`;
+                    if (types.includes('cultural')) plan += `<li>• Explore tribal villages</li>`;
+                } else {
+                    plan += `<li>• Explore ${destinations[i % destinations.length].name}</li>`;
+                    plan += `<li>• Local cuisine tasting</li>`;
+                }
+                
+                plan += `</ul></div>`;
+            }
+            
+            plan += `
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <h4 class="font-bold mb-2">Estimated Budget Breakdown:</h4>
+                    <ul class="text-sm text-gray-700">
+                        <li>• Accommodation: ₹${budget === 'budget' ? '2,000' : budget === 'mid' ? '5,000' : '10,000'} per day</li>
+                        <li>• Food: ₹${budget === 'budget' ? '800' : budget === 'mid' ? '1,500' : '3,000'} per day</li>
+                        <li>• Transportation: ₹${budget === 'budget' ? '1,000' : budget === 'mid' ? '2,000' : '4,000'} per day</li>
+                        <li>• Activities: ₹${budget === 'budget' ? '500' : budget === 'mid' ? '1,000' : '2,000'} per day</li>
+                    </ul>
+                </div>
+            `;
+            
+            planContent.innerHTML = plan;
+            tripPlan.classList.remove('hidden');
+            tripPlan.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showSOS() {
+            document.getElementById('sosModal').style.display = 'block';
+        }
+        
+        function closeSOS() {
+            document.getElementById('sosModal').style.display = 'none';
+        }
+        
+        function callEmergency(type) {
+            const numbers = {
+                police: '100',
+                fire: '101',
+                ambulance: '108',
+                tourist: '1363'
+            };
+            
+            const services = {
+                police: 'Police',
+                fire: 'Fire Brigade',
+                ambulance: 'Ambulance',
+                tourist: 'Tourist Helpline'
+            };
+            
+            alert(`Calling ${services[type]} at ${numbers[type]}\n\nIn a real emergency, this would dial the number automatically.`);
+            closeSOS();
+        }
+        
+        function shareLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    alert(`Location shared!\nLatitude: ${lat.toFixed(6)}\nLongitude: ${lon.toFixed(6)}\n\nEmergency services have been notified of your location.`);
+                }, function() {
+                    alert('Location sharing failed. Please enable location services and try again.');
+                });
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+        
+        function quickBook(type) {
+            if (!currentUser) {
+                alert('Please login first to make quick bookings.');
+                showLogin();
+                return;
+            }
+            
+            const services = {
+                hotel: 'Hotel Booking',
+                guide: 'Tour Guide Booking',
+                bus: 'Bus Ticket Booking',
+                package: 'Tour Package Booking'
+            };
+            
+            alert(`${services[type]} initiated!\n\nYou will be redirected to the booking page with pre-filled details.`);
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDestinations();
+            loadGallery();
+        });
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.login-modal, .booking-modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9848a64831d39365',t:'MTc1ODc4MzY3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
